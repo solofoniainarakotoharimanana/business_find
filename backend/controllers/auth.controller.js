@@ -2,6 +2,8 @@ import User from "../models/user.model.js"
 import bcrypt from "bcryptjs";
 import { generateTokenAndSetCookie } from "../utils/generateTokenAndSetCookie.js";
 import { sendVerificationEmail, sendWelcomeEmail } from "../mailtrap/emails.js";
+// import emailExistence from "email-existence";
+
 
 
 export const signUp = async (req, res) => {
@@ -20,6 +22,11 @@ export const signUp = async (req, res) => {
                 message: "Email address already used!!"
             })
         }
+
+        //CHECK IF EMAIl ADDRESS EXIST
+        // const response = emailExistence.check(email, function(error, response){
+        //     console.log('res: '+response);
+        // });
 
         const hashedPassword = await bcrypt.hash(password, 10);
         const verificationToken = Math.floor(100000 + Math.random() * 900000).toString();
@@ -100,5 +107,10 @@ export const login = (req, res) => {
 }
 
 export const logout = (req, res) => {
-    res.send("SIGN OUT ROUTE >>>");
+    // res.send("SIGN OUT ROUTE >>>");
+    res.clearCookie("token");
+    res.status(400).json({
+        success: true,
+        message: "User logged out successfully."
+    })
 }
