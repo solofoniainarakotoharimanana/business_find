@@ -66,11 +66,13 @@ export const signUp = async (req, res) => {
 export const verifyEmail = async (req, res) => {
     //123456
     const { code } = req.body;
-    try {
+
+    try {   
         const user = await User.findOne({
             verificationToken: code,
             verificationTokenExpiresAt: {$gt: Date.now()}
         })
+                 
 
         if (!user) {
             return res.status(400).json({
