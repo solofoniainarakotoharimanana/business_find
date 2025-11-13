@@ -1,25 +1,49 @@
 
 import './App.css'
 import FloatingShape from './components/FloatingShape'
-import { Route, Routes } from 'react-router-dom';
+import { Navigate, Route, Routes } from 'react-router-dom';
 import SignUpPage from './pages/SignUpPage'
 import SignInPage from './pages/SignInPage'
 import EmailVerificationPage from './pages/EmailVerificationPage'
 import { useAuthStore } from './store/authStore';
-import { useState } from 'react';
+import { useEffect } from 'react';
+import DashboardPage from './pages/DashboardPage';
+import LoadingSpinner from './components/LoadingSpinner';
+
 // import { Toaster } from 'react-hot-toast'
 
-function App() {
-  // const [count, setCount] = useState(0)
+//Protect Routes that require authentication
+const ProtectedRoute = ({ children }) => {
+  const { isAuthenticated, user } = useAuthStore();
+  if (!isAuthenticated ) {
+    return <Navigate to="/login" replace />
+  }
+  if (!user.isVerified) {
+    return <Navigate to="/verify-email" replace />
+  }
 
+  return children;
+}
+
+//Redirect authenticated user to home page
+const RedirectAuthenticatedUser = ({children}) => {
+  const { isAuthenticated, user } = useAuthStore();  
+  if (isAuthenticated && user.isVerified) {
+    return <Navigate to="/" replace />
+  }
+
+  return children;
+}
+
+function App() {
   const { isCheckingAuth, checkAuth, isAuthenticated, user } = useAuthStore();
   
-  useState(() => {
+  useEffect(() => {   
     checkAuth();
-  }, [])
+  }, [checkAuth])
 
-  console.log("IS AUTH >>> ", isAuthenticated)
-  console.log("USER >>> ", user)
+  if (isCheckingAuth) return <LoadingSpinner />;
+
 
   return (
     <>
@@ -32,9 +56,16 @@ function App() {
 			  <FloatingShape color='bg-lime-500' size='w-32 h-32' top='40%' left='-10%' delay={2} />
 
         <Routes>
-          <Route path='/' element={"Home"} />
-          <Route path='/signup' element={<SignUpPage />} />
-          <Route path='/login' element={<SignInPage />} />
+          <Route path='/' element={<ProtectedRoute>
+            <DashboardPage />
+          </ProtectedRoute>} />
+          {/* <Route path='/signup' element={<SignUpPage />} /> */}
+          <Route path='/signup' element={<RedirectAuthenticatedUser>
+            <SignUpPage />
+          </RedirectAuthenticatedUser> } />
+          <Route path='/login' element={<RedirectAuthenticatedUser>
+            <SignInPage />
+          </RedirectAuthenticatedUser>} />
           <Route path='/verify-email' element={<EmailVerificationPage />} />
         </Routes>
                

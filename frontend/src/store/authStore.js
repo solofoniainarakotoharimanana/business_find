@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import axios from "axios";
 
+//redirect authicated users to the home page
 const API_URL = "http://localhost:5000/api/auth";
 
 axios.defaults.withCredentials = true;//Axios put the cookie every request
@@ -58,6 +59,7 @@ export const useAuthStore = create((set) => ({
             throw error;
         }
     },
+
     checkAuth: async () => {
         set({
             isCheckingAuth: true, 
@@ -66,6 +68,7 @@ export const useAuthStore = create((set) => ({
 
         try {
             const response = await axios.get(`${API_URL}/check-auth`);
+            
             set({
                 user: response.data.user,
                 isAuthenticated: true,
@@ -78,6 +81,9 @@ export const useAuthStore = create((set) => ({
                 isCheckingAuth: false
             })
         }
+    },
+    login: async (email, password) => {
+        
     }
     
 }));
